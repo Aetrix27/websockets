@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
+   
     <style>
       body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
@@ -16,19 +17,52 @@
     </style>
   </head>
   <body id = "chat-app">
+
+    <form class="username-form">
+      <input id="username-input" placeholder="Username"></input>
+      <button id="create-user-btn">Join Chat</button>
+    </form>
+    <div id = "typing"></div>
+
     <ul id="messages"></ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link href='https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css'></link>
         <script src="/socket.io/socket.io.js"></script>
-        <script src="index.js"></script>
+  
         <script>
           var socket = io();
         
           var messages = document.getElementById('messages');
           var form = document.getElementById('form');
           var input = document.getElementById('input');
+          let typing = document.getElementById('typing');  
+
+          input.addEventListener('keydown', function(e) {
+            socket.emit('typing', true);
+
+          });
+          socket.on('typing', function(msg){
+            typing.textContent = "Typing"
+            socket.emit('typing', msg)
+          });
+
+          //index.js 
+          $(document).ready(() => {
+            const socket = io.connect();
+
+            $('#create-user-btn').click((e) => {
+              e.preventDefault();
+              let username = $('#username-input').val();
+              if(username.length > 0){
+                //Emit to the server the new user
+                socket.emit('new user', username);
+                $('.username-form').remove();
+              }
+            });
+          })
         
           form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -37,13 +71,15 @@
               input.value = '';
             }
           });
-        
+
           socket.on('chat message', function(msg) {
             var item = document.createElement('li');
             item.textContent = msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
+            typing.textContent = null
           });
+          
         </script>
   </body>
 </html>

@@ -3,6 +3,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+
 const io = new Server(server);
 
 app.get('/', (req, res) => {
@@ -10,18 +11,28 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  io.emit('connected');
+  let onlineUsers = {};
+
+  // This file will be read on new socket connections
+  require('./chat.js')(io, socket);
+  //socket listeners
+  socket.on('new user', (username) => {
+    console.log(`✋ ${username} has joined the chat! ✋`);
+   })
+
+  socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
-
+    console.log('message: ', msg);
   });
-  socket.broadcast.emit('hi');
+  socket.on('disconnect', () => {
+    io.emit('disconnected');
+  });
+  socket.on('typing', (msg) =>{
+    io.emit('typing', msg)
+  });
+})
 
-});
-
-io.emit('some event', { someProperty: 'some value', otherProperty: 'other value' }); // This will emit the event to all connected sockets
-
-server.listen(3000, () => {
+server.listen(3001, () => {
   console.log('listening on *:3000');
 });
