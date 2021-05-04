@@ -23,6 +23,7 @@
       <button id="create-user-btn">Join Chat</button>
     </form>
     <div id = "typing"></div>
+    <div class = "users-online"></div>
 
     <ul id="messages"></ul>
     <form id="form" action="">
@@ -62,6 +63,13 @@
                 $('.username-form').remove();
               }
             });
+          })
+
+          //socket listeners
+          socket.on('new user', (username) => {
+            console.log(`${username} has joined the chat`);
+            // Add the new user to the online users div
+            $('.users-online').append(`<div class="user-online">${username}</div>`);
           })
         
           form.addEventListener('submit', function(e) {
