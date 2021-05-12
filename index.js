@@ -18,7 +18,7 @@ io.on('connection', (socket) => {
   require('./chat.js')(io, socket);
   //socket listeners
   socket.on('new user', (username) => {
-    console.log(`✋ ${username} has joined the chat! ✋`);
+    console.log(`${username} has joined the chat!`);
    })
 
   socket.on('chat message', (msg) => {
